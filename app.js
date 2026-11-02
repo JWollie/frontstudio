@@ -7,23 +7,24 @@
   function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
   $("#year").textContent = new Date().getFullYear();
 
-  var nav = $("#nav"), steps = $("#steps"), ticking = false;
+  var nav = $("#nav"), steps = $("#steps"), stepItems = $$("li", steps), ticking = false;
   function onScroll() {
     ticking = false;
     var height = d.documentElement.scrollHeight - window.innerHeight;
-    nav.style.setProperty("--p", height > 0 ? window.scrollY / height : 0);
     var rect = steps.getBoundingClientRect();
     var progress = clamp((window.innerHeight * 0.75 - rect.top) / rect.height, 0, 1);
+    nav.style.setProperty("--p", height > 0 ? window.scrollY / height : 0);
     steps.style.setProperty("--p", progress);
-    $$("li", steps).forEach(function (item, index, items) {
+    stepItems.forEach(function (item, index, items) {
       item.classList.toggle("on", progress > index / items.length);
     });
   }
   function requestScroll() {
-    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+    if (!ticking && !d.hidden) { ticking = true; requestAnimationFrame(onScroll); }
   }
   window.addEventListener("scroll", requestScroll, { passive: true });
   window.addEventListener("resize", requestScroll);
+  d.addEventListener("visibilitychange", function () { if (!d.hidden) requestScroll(); });
   onScroll();
 
   var comparison = $("#ba"), slider = $("input", comparison);
